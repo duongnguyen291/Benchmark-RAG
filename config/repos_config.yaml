@@ -1,0 +1,81 @@
+repositories:
+  marker:
+    name: "Marker"
+    repo_url: "https://github.com/fabiensabatie/marker"
+    description: "High-performance PDF to Markdown converter"
+    setup_commands:
+      - "git clone https://github.com/fabiensabatie/marker.git"
+      - "cd marker && pip install -r requirements.txt"
+    extract_command: "python marker.py {input_file} --output {output_file}"
+    output_format: "markdown"
+    supported_formats: ["pdf"]
+    
+  unstructured:
+    name: "Unstructured"
+    repo_url: "https://github.com/Unstructured-IO/unstructured"
+    description: "Open source libraries for processing unstructured data"
+    setup_commands:
+      - "pip install unstructured[pdf]"
+    extract_command: "unstructured-ingest --input-path {input_file} --output-dir {output_dir} --strategy fast"
+    output_format: "markdown"
+    supported_formats: ["pdf", "docx"]
+    
+  parsr:
+    name: "Parsr"
+    repo_url: "https://github.com/axa-group/Parsr"
+    description: "Document parsing and analysis tool"
+    setup_commands:
+      - "git clone https://github.com/axa-group/Parsr.git"
+      - "cd Parsr && npm install"
+    extract_command: "parsr {input_file} --output {output_file}"
+    output_format: "markdown"
+    supported_formats: ["pdf"]
+    
+  dolphin:
+    name: "Dolphin"
+    repo_url: "https://github.com/dolphin-ai/dolphin"
+    description: "AI-powered document processing"
+    setup_commands:
+      - "pip install dolphin-ai"
+    extract_command: "dolphin extract {input_file} --output {output_file}"
+    output_format: "markdown"
+    supported_formats: ["pdf", "docx"]
+    
+  ade_landing:
+    name: "ADE Landing AI"
+    repo_url: "https://github.com/ade-landing/ade-landing-ai"
+    description: "Advanced document extraction"
+    setup_commands:
+      - "git clone https://github.com/ade-landing/ade-landing-ai.git"
+      - "cd ade-landing-ai && pip install -r requirements.txt"
+    extract_command: "python extract.py {input_file} --output {output_file}"
+    output_format: "markdown"
+    supported_formats: ["pdf"]
+
+# Ground truth configuration
+ground_truth:
+  docx_to_markdown:
+    tool: "mammoth"
+    command: "mammoth {input_file} --output-format=markdown"
+    description: "Using mammoth for DOCX to Markdown conversion as ground truth"
+
+# Evaluation settings
+evaluation:
+  metrics:
+    - "content_similarity"
+    - "structure_accuracy" 
+    - "formatting_preservation"
+    - "table_quality"
+    - "processing_time"
+  
+  bert_score:
+    model: "microsoft/deberta-v3-base"
+    batch_size: 16
+    
+  manual_evaluation:
+    criteria:
+      - "overall_quality"
+      - "table_format_quality"
+      - "structure_preservation"
+      - "formatting_accuracy"
+    rating_scale: 5
