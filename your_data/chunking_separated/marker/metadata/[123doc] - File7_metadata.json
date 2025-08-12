@@ -1,0 +1,175 @@
+{
+  "total_chunks": 12,
+  "chunk_size": 1000,
+  "overlap": 200,
+  "chunks": [
+    {
+      "id": "section_0_chunk_0",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 0,
+        "total_chunks": 12,
+        "length": 893,
+        "is_complete_section": false
+      },
+      "enrichment_length": 519
+    },
+    {
+      "id": "section_0_chunk_1",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 1,
+        "total_chunks": 12,
+        "length": 962,
+        "is_complete_section": false
+      },
+      "enrichment_length": 654
+    },
+    {
+      "id": "section_0_chunk_2",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 2,
+        "total_chunks": 12,
+        "length": 544,
+        "is_complete_section": false
+      },
+      "enrichment_length": 656
+    },
+    {
+      "id": "section_0_chunk_3",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 3,
+        "total_chunks": 12,
+        "length": 71175,
+        "is_complete_section": false
+      },
+      "enrichment_length": 71616
+    },
+    {
+      "id": "section_0_chunk_4",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 4,
+        "total_chunks": 12,
+        "length": 71100,
+        "is_complete_section": false
+      },
+      "enrichment_length": 656
+    },
+    {
+      "id": "section_0_chunk_5",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 5,
+        "total_chunks": 12,
+        "length": 71136,
+        "is_complete_section": false
+      },
+      "enrichment_length": 71612
+    },
+    {
+      "id": "section_0_chunk_6",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 6,
+        "total_chunks": 12,
+        "length": 236,
+        "is_complete_section": false
+      },
+      "enrichment_length": 654
+    },
+    {
+      "id": "section_0_chunk_7",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 7,
+        "total_chunks": 12,
+        "length": 67869,
+        "is_complete_section": false
+      },
+      "enrichment_length": 655
+    },
+    {
+      "id": "section_0_chunk_8",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 8,
+        "total_chunks": 12,
+        "length": 67789,
+        "is_complete_section": false
+      },
+      "enrichment_length": 656
+    },
+    {
+      "id": "section_0_chunk_9",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 9,
+        "total_chunks": 12,
+        "length": 67780,
+        "is_complete_section": false
+      },
+      "enrichment_length": 68353
+    },
+    {
+      "id": "section_0_chunk_10",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 10,
+        "total_chunks": 12,
+        "length": 991,
+        "is_complete_section": false
+      },
+      "enrichment_length": 661
+    },
+    {
+      "id": "section_0_chunk_11",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 11,
+        "total_chunks": 12,
+        "length": 656,
+        "is_complete_section": false
+      },
+      "enrichment_length": 433
+    }
+  ]
+}

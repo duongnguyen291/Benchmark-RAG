@@ -1,0 +1,35 @@
+{
+  "total_chunks": 2,
+  "chunk_size": 1000,
+  "overlap": 200,
+  "chunks": [
+    {
+      "id": "section_0_chunk_0",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 0,
+        "total_chunks": 2,
+        "length": 51,
+        "is_complete_section": false
+      },
+      "enrichment_length": 354
+    },
+    {
+      "id": "section_0_chunk_1",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 1,
+        "total_chunks": 2,
+        "length": 2068,
+        "is_complete_section": false
+      },
+      "enrichment_length": 322
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "total_chunks": 11,
+  "chunk_size": 1000,
+  "overlap": 200,
+  "chunks": [
+    {
+      "id": "section_0_chunk_0",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 0,
+        "total_chunks": 11,
+        "length": 187,
+        "is_complete_section": false
+      },
+      "enrichment_length": 473
+    },
+    {
+      "id": "section_0_chunk_1",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 1,
+        "total_chunks": 11,
+        "length": 8110,
+        "is_complete_section": false
+      },
+      "enrichment_length": 648
+    },
+    {
+      "id": "section_0_chunk_2",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 2,
+        "total_chunks": 11,
+        "length": 8074,
+        "is_complete_section": false
+      },
+      "enrichment_length": 708
+    },
+    {
+      "id": "section_0_chunk_3",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 3,
+        "total_chunks": 11,
+        "length": 8055,
+        "is_complete_section": false
+      },
+      "enrichment_length": 653
+    },
+    {
+      "id": "section_0_chunk_4",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 4,
+        "total_chunks": 11,
+        "length": 1133,
+        "is_complete_section": false
+      },
+      "enrichment_length": 701
+    },
+    {
+      "id": "section_0_chunk_5",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 5,
+        "total_chunks": 11,
+        "length": 1133,
+        "is_complete_section": false
+      },
+      "enrichment_length": 704
+    },
+    {
+      "id": "section_0_chunk_6",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 6,
+        "total_chunks": 11,
+        "length": 4904,
+        "is_complete_section": false
+      },
+      "enrichment_length": 651
+    },
+    {
+      "id": "section_0_chunk_7",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 7,
+        "total_chunks": 11,
+        "length": 3903,
+        "is_complete_section": false
+      },
+      "enrichment_length": 755
+    },
+    {
+      "id": "section_0_chunk_8",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 8,
+        "total_chunks": 11,
+        "length": 3985,
+        "is_complete_section": false
+      },
+      "enrichment_length": 697
+    },
+    {
+      "id": "section_0_chunk_9",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 9,
+        "total_chunks": 11,
+        "length": 926,
+        "is_complete_section": false
+      },
+      "enrichment_length": 717
+    },
+    {
+      "id": "section_0_chunk_10",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 10,
+        "total_chunks": 11,
+        "length": 455,
+        "is_complete_section": false
+      },
+      "enrichment_length": 477
+    }
+  ]
+}

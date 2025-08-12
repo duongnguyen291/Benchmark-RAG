@@ -1,0 +1,21 @@
+{
+  "total_chunks": 1,
+  "chunk_size": 1000,
+  "overlap": 200,
+  "chunks": [
+    {
+      "id": "section_0_chunk_0",
+      "section": "Introduction",
+      "metadata": {
+        "section_id": "section_0",
+        "section_header": "Introduction",
+        "section_level": 0,
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "length": 596,
+        "is_complete_section": true
+      },
+      "enrichment_length": 335
+    }
+  ]
+}
