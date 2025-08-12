@@ -1,0 +1,69 @@
+
+
+{0}------------------------------------------------
+
+☞ Các hàm INT, MOD xử lý số nguyên; các phép toán trên dữ liệu kiểu ngày (hiệu
+của 2 ngày), định dạng kiểu ngày. Vận dụng hàm tìm kiếm HLOOKUP để tìm
+một giá trị tham gia vào quá trình tính toán.
+
+| MS  | LPH | NDEN     | NDI      | STU | SNG | TTUAN       | TNGAY     | THTIEN      |
+|-----|-----|----------|----------|-----|-----|-------------|-----------|-------------|
+| a1  | A   | 06/12/95 | 06/15/95 | 0   | 3   | 0 ₫         | 330,000 ₫ | 330,000 ₫   |
+| a2  | C   | 06/12/95 | 06/15/95 | 0   | 3   | 0 ₫         | 225,000 ₫ | 225,000 ₫   |
+| a3  | C   | 06/12/95 | 06/21/95 | 1   | 2   | 500,000 ₫   | 150,000 ₫ | 650,000 ₫   |
+| a4  | B   | 06/12/95 | 06/25/95 | 1   | 6   | 600,000 ₫   | 540,000 ₫ | 1,140,000 ₫ |
+| a5  | B   | 06/12/95 | 06/28/95 | 2   | 2   | 1,200,000 ₫ | 180,000 ₫ | 1,380,000 ₫ |
+| a6  | C   | 06/17/95 | 06/29/95 | 1   | 5   | 500,000 ₫   | 375,000 ₫ | 875,000 ₫   |
+| a7  | A   | 07/01/95 | 07/03/95 | 0   | 2   | 0 ₫         | 220,000 ₫ | 220,000 ₫   |
+| a8  | A   | 07/02/95 | 07/09/95 | 1   | 0   | 700,000 ₫   | 0 ₫       | 700,000 ₫   |
+| a9  | C   | 07/25/95 | 08/10/95 | 2   | 2   | 1,000,000 ₫ | 150,000 ₫ | 1,150,000 ₫ |
+| a10 | B   | 07/26/95 | 08/12/95 | 2   | 3   | 1,200,000 ₫ | 270,000 ₫ | 1,470,000 ₫ |
+
+Tổng cộng: 5,70
+
+| A      | B      | C      |
+|--------|--------|--------|
+| 700000 | 600000 | 500000 |
+
+**Câu 5** Trang trí và lưu với tên BTAP4.XLS
+
+1. Một tuần gồm 7 ngày; do đó số tuần bằng phần nguyên của số ngày lưu trú chia
+   cho 7. Số ngày sau khi tính tuần sẽ là phần dư của phép chia 7. Ta có công thức
+   tính như sau:
+
+[STU] = INT(([NDI]-[NDEN])/7)
+
+[SNG] = MOD([NDI]-[NDEN], 7)
+
+2. Để biết đơn giá (theo loại phòng) ta dò tìm trong bảng giá, và vì bảng giá bố trí số
+   liệu theo chiều ngang nên ta dùng hàm HLOOKUP. Khi đó đơn giá tiền tuần ở
+   hàng thứ 2 và đơn giá tiền ngày ở hàng thứ 3 của bảng tìm. Ta có:
+
+{1}------------------------------------------------
+
+[TTUAN] = [STU] \* HLOOKUP([LPH], bảng\_tìm, 2, 0)  
+[TNGAY] = [SNG] \* HLOOKUP([LPH], bảng\_tìm, 3, 0)
+
+| MSO | TEN   | SLUONG | TTIEN   | GCHU |
+|-----|-------|--------|---------|------|
+| A   | DOS   | 40     | 4800000 | X    |
+| B   | WORD  | 20     | 2800000 |      |
+| C   | EXCEL | 35     | 4550000 | X    |
+| A   | DOS   | 25     | 3000000 |      |
+| C   | EXCEL | 35     | 4550000 | X    |
+| B   | WORD  | 15     | 2100000 |      |
+| C   | EXCEL | 40     | 5200000 | X    |
+| B   | WORD  | 25     | 3500000 |      |
+| A   | DOS   | 45     | 5400000 | X    |
+
+- Sử dụng hàm tìm kiếm VLOOKUP
+
+| Mã số | Tên   | Đơn giá |
+|-------|-------|---------|
+| A     | DOS   | 120000  |
+| B     | WORD  | 140000  |
+| C     | EXCEL | 130000  |
+
+**Câu 1** Chọn Sheet3 của BTAP4 để nhập dữ liệu.
+
+**Câu 2** Căn cứ vào bảng chứa tên và đơn giá của mã số để điền thông tin vào cột TEN

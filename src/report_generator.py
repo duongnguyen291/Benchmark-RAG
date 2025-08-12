@@ -61,22 +61,18 @@ class ReportGenerator:
         
         logger.info(f"Detailed report saved to {report_file}")
     
-    def generate_summary_report(self, benchmark_summary: BenchmarkSummary):
+    def generate_summary_report(self, evaluation_results: Dict, extraction_results: Dict, ground_truth_results: Dict):
         """Generate summary report."""
         logger.info("Generating summary report...")
         
         summary_data = {
-            "benchmark_info": {
-                "date": benchmark_summary.benchmark_date.isoformat(),
-                "total_files": len(benchmark_summary.test_files),
-                "repositories_tested": benchmark_summary.repositories_tested,
-                "total_processing_time": benchmark_summary.total_processing_time
+            "evaluation_info": {
+                "total_files": len(ground_truth_results),
+                "repositories_tested": len(evaluation_results),
+                "total_evaluations": sum(len(repo_results) for repo_results in evaluation_results.values())
             },
-            "repository_summary": self._create_repository_summary(benchmark_summary),
-            "best_performers": {
-                "best_overall": benchmark_summary.get_best_repository(),
-                "fastest": benchmark_summary.get_fastest_repository()
-            }
+            "repository_summary": self._create_repository_performance_section(evaluation_results),
+            "file_summary": self._create_file_analysis_section(evaluation_results)
         }
         
         # Save summary report
@@ -106,7 +102,7 @@ class ReportGenerator:
         """Create summary section of detailed report."""
         total_evaluations = sum(len(repo_results) for repo_results in evaluation_results.values())
         successful_evaluations = sum(
-            sum(1 for eval_result in repo_results.values() 
+            sum(1 for eval_result in repo_results 
                 if eval_result.overall_score > 0)
             for repo_results in evaluation_results.values()
         )
@@ -122,27 +118,27 @@ class ReportGenerator:
         """Create repository performance section."""
         repo_performance = {}
         
-        for file_results in evaluation_results.values():
-            for repo_id, eval_result in file_results.items():
-                if repo_id not in repo_performance:
-                    repo_performance[repo_id] = {
-                        "scores": [],
-                        "processing_times": [],
-                        "success_count": 0,
-                        "total_count": 0
-                    }
-                
-                repo_performance[repo_id]["scores"].append(eval_result.overall_score)
-                repo_performance[repo_id]["processing_times"].append(
+        for repo_name, repo_results in evaluation_results.items():
+            if repo_name not in repo_performance:
+                repo_performance[repo_name] = {
+                    "scores": [],
+                    "processing_times": [],
+                    "success_count": 0,
+                    "total_count": 0
+                }
+            
+            for eval_result in repo_results:
+                repo_performance[repo_name]["scores"].append(eval_result.overall_score)
+                repo_performance[repo_name]["processing_times"].append(
                     eval_result.extraction_result.processing_time.total_time
                 )
-                repo_performance[repo_id]["total_count"] += 1
+                repo_performance[repo_name]["total_count"] += 1
                 
                 if eval_result.overall_score > 0:
-                    repo_performance[repo_id]["success_count"] += 1
+                    repo_performance[repo_name]["success_count"] += 1
         
         # Calculate averages
-        for repo_id, data in repo_performance.items():
+        for repo_name, data in repo_performance.items():
             data["average_score"] = sum(data["scores"]) / len(data["scores"]) if data["scores"] else 0
             data["average_processing_time"] = sum(data["processing_times"]) / len(data["processing_times"]) if data["processing_times"] else 0
             data["success_rate"] = data["success_count"] / data["total_count"] if data["total_count"] > 0 else 0
@@ -153,14 +149,21 @@ class ReportGenerator:
         """Create file analysis section."""
         file_analysis = {}
         
-        for file_path, repo_results in evaluation_results.items():
-            file_name = Path(file_path).name
+        # Group by file name across all repositories
+        file_scores = {}
+        for repo_name, repo_results in evaluation_results.items():
+            for eval_result in repo_results:
+                file_name = Path(eval_result.extraction_result.file_path).name
+                if file_name not in file_scores:
+                    file_scores[file_name] = []
+                file_scores[file_name].append(eval_result.overall_score)
+        
+        for file_name, scores in file_scores.items():
             file_analysis[file_name] = {
-                "repositories": len(repo_results),
-                "best_score": max(eval_result.overall_score for eval_result in repo_results.values()),
-                "worst_score": min(eval_result.overall_score for eval_result in repo_results.values()),
-                "average_score": sum(eval_result.overall_score for eval_result in repo_results.values()) / len(repo_results),
-                "best_repository": max(repo_results.items(), key=lambda x: x[1].overall_score)[0]
+                "repositories": len(scores),
+                "best_score": max(scores),
+                "worst_score": min(scores),
+                "average_score": sum(scores) / len(scores)
             }
         
         return file_analysis
@@ -174,8 +177,8 @@ class ReportGenerator:
             "table_quality": []
         }
         
-        for file_results in evaluation_results.values():
-            for eval_result in file_results.values():
+        for repo_results in evaluation_results.values():
+            for eval_result in repo_results:
                 metrics["content_similarity"].append(eval_result.content_similarity.bert_score)
                 metrics["structure_accuracy"].append(eval_result.structure_accuracy.header_accuracy)
                 metrics["formatting_preservation"].append(eval_result.formatting_preservation.bold_accuracy)
@@ -199,8 +202,8 @@ class ReportGenerator:
         """Create error analysis section."""
         errors = {}
         
-        for file_results in extraction_results.values():
-            for repo_id, extraction_result in file_results.items():
+        for repo_name, repo_results in extraction_results.items():
+            for extraction_result in repo_results:
                 if not extraction_result.success:
                     error_type = "extraction_failed"
                     error_msg = extraction_result.error_message or "Unknown error"
@@ -208,10 +211,10 @@ class ReportGenerator:
                     if error_type not in errors:
                         errors[error_type] = {}
                     
-                    if repo_id not in errors[error_type]:
-                        errors[error_type][repo_id] = []
+                    if repo_name not in errors[error_type]:
+                        errors[error_type][repo_name] = []
                     
-                    errors[error_type][repo_id].append({
+                    errors[error_type][repo_name].append({
                         "file": Path(extraction_result.file_path).name,
                         "error": error_msg
                     })
@@ -239,12 +242,12 @@ class ReportGenerator:
         """Create DataFrame for visualization."""
         data = []
         
-        for file_path, repo_results in evaluation_results.items():
-            file_name = Path(file_path).name
-            for repo_id, eval_result in repo_results.items():
+        for repo_name, repo_results in evaluation_results.items():
+            for eval_result in repo_results:
+                file_name = Path(eval_result.extraction_result.file_path).name
                 data.append({
                     "file": file_name,
-                    "repository": repo_id,
+                    "repository": repo_name,
                     "overall_score": eval_result.overall_score,
                     "content_similarity": eval_result.content_similarity.bert_score,
                     "structure_accuracy": eval_result.structure_accuracy.header_accuracy,
@@ -327,7 +330,10 @@ class ReportGenerator:
         ax2.set_ylabel('Overall Score')
         
         plt.tight_layout()
-        plt.savefig(self.output_dir / "processing_time_analysis.png", dpi=300, bbox_inches='tight')
+        try:
+            plt.savefig(self.output_dir / "processing_time_analysis.png", dpi=300, bbox_inches='tight')
+        except Exception as e:
+            logger.warning(f"Failed to save processing time plot: {e}")
         plt.close()
     
     def _generate_score_distribution_plot(self, df: pd.DataFrame):
@@ -347,7 +353,10 @@ class ReportGenerator:
             axes[row, col].set_xlabel(title)
         
         plt.tight_layout()
-        plt.savefig(self.output_dir / "score_distribution.png", dpi=300, bbox_inches='tight')
+        try:
+            plt.savefig(self.output_dir / "score_distribution.png", dpi=300, bbox_inches='tight')
+        except Exception as e:
+            logger.warning(f"Failed to save score distribution plot: {e}")
         plt.close()
     
     def _generate_interactive_dashboard(self, df: pd.DataFrame):
@@ -451,8 +460,8 @@ class ReportGenerator:
     def _calculate_average_score(self, evaluation_results: Dict) -> float:
         """Calculate average overall score."""
         scores = []
-        for file_results in evaluation_results.values():
-            for eval_result in file_results.values():
+        for repo_results in evaluation_results.values():
+            for eval_result in repo_results:
                 scores.append(eval_result.overall_score)
         
         return sum(scores) / len(scores) if scores else 0.0

@@ -29,12 +29,15 @@ class ProcessingTime:
 
 @dataclass
 class ContentSimilarityMetrics:
-    """Content similarity evaluation metrics."""
+    """Content similarity evaluation metrics using Levenshtein-based scoring."""
     bert_score: float
     rouge_score: float
     bleu_score: float
     exact_match: float
     word_overlap: float
+    character_similarity: float  # Character-level Levenshtein similarity
+    word_similarity: float       # Word-level Levenshtein similarity
+    sentence_similarity: float   # Sentence-level Levenshtein similarity
 
 
 @dataclass
@@ -100,33 +103,51 @@ class EvaluationResult:
     
     @property
     def overall_score(self) -> float:
-        """Calculate overall score as weighted average of metrics."""
+        """Calculate overall evaluation score using Levenshtein-based weighted combination."""
         weights = {
-            'content': 0.4,
+            'content': 0.35,  # Increased weight for content similarity
             'structure': 0.25,
-            'formatting': 0.2,
-            'table': 0.15
+            'formatting': 0.20,
+            'table': 0.20
         }
         
-        content_score = self.content_similarity.bert_score
-        structure_score = (
-            self.structure_accuracy.header_accuracy +
-            self.structure_accuracy.list_accuracy +
-            self.structure_accuracy.section_order_accuracy
-        ) / 3
-        formatting_score = (
-            self.formatting_preservation.bold_accuracy +
-            self.formatting_preservation.italic_accuracy +
-            self.formatting_preservation.link_accuracy
-        ) / 3
-        table_score = self.table_quality.content_accuracy
+        # Use Levenshtein-based content similarity as primary content score
+        # Weighted combination of character, word, and sentence level similarities
+        content_score = (
+            min(self.content_similarity.character_similarity, 1.0) * 0.4 +
+            min(self.content_similarity.word_similarity, 1.0) * 0.4 +
+            min(self.content_similarity.sentence_similarity, 1.0) * 0.2
+        )
         
-        return (
+        structure_score = (
+            min(self.structure_accuracy.header_accuracy, 1.0) +
+            min(self.structure_accuracy.list_accuracy, 1.0) +
+            min(self.structure_accuracy.section_order_accuracy, 1.0) +
+            min(self.structure_accuracy.paragraph_accuracy, 1.0)
+        ) / 4
+        
+        formatting_score = (
+            min(self.formatting_preservation.bold_accuracy, 1.0) +
+            min(self.formatting_preservation.italic_accuracy, 1.0) +
+            min(self.formatting_preservation.link_accuracy, 1.0) +
+            min(self.formatting_preservation.image_accuracy, 1.0)
+        ) / 4
+        
+        # Use both content accuracy and structure preservation for table score
+        table_score = (
+            min(self.table_quality.content_accuracy, 1.0) * 0.7 +
+            min(self.table_quality.structure_preservation, 1.0) * 0.3
+        )
+        
+        final_score = (
             weights['content'] * content_score +
             weights['structure'] * structure_score +
             weights['formatting'] * formatting_score +
             weights['table'] * table_score
         )
+        
+        # Ensure final score is between 0 and 1
+        return max(0.0, min(1.0, final_score))
 
 
 @dataclass

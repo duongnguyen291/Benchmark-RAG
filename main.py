@@ -135,9 +135,9 @@ def evaluate_prepared_files(args):
     """Evaluate pre-extracted Markdown files against ground truth."""
     print("🔍 Starting Evaluation of Prepared Files...")
     
-    ground_truth_dir = Path(args.ground_truth_dir)
-    extracted_files_dir = Path(args.extracted_files_dir)
-    output_dir = Path(args.output_dir)
+    ground_truth_dir = Path(args.ground_truth)
+    extracted_files_dir = Path(args.extracted)
+    output_dir = Path(args.output)
     
     # Validate directories
     if not ground_truth_dir.exists():
@@ -152,7 +152,7 @@ def evaluate_prepared_files(args):
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Initialize evaluator and report generator
-    evaluator = DocumentEvaluator()
+    evaluator = DocumentEvaluator(fast_mode=getattr(args, 'fast', False))
     report_generator = ReportGenerator(str(output_dir))
     
     # Find all ground truth files
@@ -204,19 +204,18 @@ def evaluate_prepared_files(args):
                 
                 # Create extraction result (simulated)
                 extraction_result = ExtractionResult(
-                    repository_id=repo_name,
+                    file_path=str(gt_file),
                     repository_name=repo_name,
-                    input_file=str(gt_file),
-                    output_file=str(extracted_file),
-                    success=True,
+                    output_path=str(extracted_file),
                     processing_time=ProcessingTime(
                         total_time=0.0,  # We don't have actual processing time
                         extraction_time=0.0,
                         preprocessing_time=0.0,
                         postprocessing_time=0.0
                     ),
+                    success=True,
                     error_message=None,
-                    extracted_content=extracted_content
+                    output_content=extracted_content
                 )
                 
                 # Evaluate
@@ -251,6 +250,9 @@ def evaluate_prepared_files(args):
     )
     report_generator.generate_visualizations(evaluation_results)
     
+    # Generate comprehensive analysis
+    generate_comprehensive_analysis(evaluation_results, output_dir)
+    
     # Save evaluation data for manual evaluation
     manual_eval_data = {
         'evaluation_results': evaluation_results,
@@ -271,15 +273,50 @@ def evaluate_prepared_files(args):
         if not results:
             continue
         
+        # Calculate averages for all metrics
         avg_score = sum(r.overall_score for r in results) / len(results)
-        avg_content_score = sum(r.content_similarity.bert_score for r in results) / len(results)
-        avg_structure_score = sum(r.structure_accuracy.header_f1_score for r in results) / len(results)
+        avg_char_sim = sum(r.content_similarity.character_similarity for r in results) / len(results)
+        avg_word_sim = sum(r.content_similarity.word_similarity for r in results) / len(results)
+        avg_sent_sim = sum(r.content_similarity.sentence_similarity for r in results) / len(results)
+        avg_word_overlap = sum(r.content_similarity.word_overlap for r in results) / len(results)
+        avg_rouge = sum(r.content_similarity.rouge_score for r in results) / len(results)
+        avg_bleu = sum(r.content_similarity.bleu_score for r in results) / len(results)
+        avg_header = sum(r.structure_accuracy.header_accuracy for r in results) / len(results)
+        avg_list = sum(r.structure_accuracy.list_accuracy for r in results) / len(results)
+        avg_section = sum(r.structure_accuracy.section_order_accuracy for r in results) / len(results)
+        avg_paragraph = sum(r.structure_accuracy.paragraph_accuracy for r in results) / len(results)
+        avg_table_content = sum(r.table_quality.content_accuracy for r in results) / len(results)
+        avg_table_structure = sum(r.table_quality.structure_preservation for r in results) / len(results)
+        avg_table_format = sum(r.table_quality.format_consistency for r in results) / len(results)
+        avg_bold = sum(r.formatting_preservation.bold_accuracy for r in results) / len(results)
+        avg_italic = sum(r.formatting_preservation.italic_accuracy for r in results) / len(results)
+        avg_link = sum(r.formatting_preservation.link_accuracy for r in results) / len(results)
+        avg_image = sum(r.formatting_preservation.image_accuracy for r in results) / len(results)
         
         print(f"\n{repo_name}:")
         print(f"  Files evaluated: {len(results)}")
-        print(f"  Average overall score: {avg_score:.3f}")
-        print(f"  Average content similarity: {avg_content_score:.3f}")
-        print(f"  Average structure accuracy: {avg_structure_score:.3f}")
+        print(f"  📈 Overall Score: {avg_score:.3f}")
+        print(f"  📝 Content Similarity (Levenshtein-based):")
+        print(f"    - Character Similarity: {avg_char_sim:.3f}")
+        print(f"    - Word Similarity: {avg_word_sim:.3f}")
+        print(f"    - Sentence Similarity: {avg_sent_sim:.3f}")
+        print(f"    - Word Overlap (F1): {avg_word_overlap:.3f}")
+        print(f"    - ROUGE Score: {avg_rouge:.3f}")
+        print(f"    - BLEU Score: {avg_bleu:.3f}")
+        print(f"  🏗️  Structure Accuracy:")
+        print(f"    - Header Accuracy: {avg_header:.3f}")
+        print(f"    - List Accuracy: {avg_list:.3f}")
+        print(f"    - Section Order: {avg_section:.3f}")
+        print(f"    - Paragraph Accuracy: {avg_paragraph:.3f}")
+        print(f"  📊 Table Quality:")
+        print(f"    - Content Accuracy: {avg_table_content:.3f}")
+        print(f"    - Structure Preservation: {avg_table_structure:.3f}")
+        print(f"    - Format Consistency: {avg_table_format:.3f}")
+        print(f"  🎨 Formatting Preservation:")
+        print(f"    - Bold Accuracy: {avg_bold:.3f}")
+        print(f"    - Italic Accuracy: {avg_italic:.3f}")
+        print(f"    - Link Accuracy: {avg_link:.3f}")
+        print(f"    - Image Accuracy: {avg_image:.3f}")
     
     print(f"\n📁 Results saved to: {output_dir}")
     print(f"🔍 Manual evaluation data: {manual_eval_file}")
@@ -298,6 +335,302 @@ def evaluate_prepared_files(args):
             print(f"Manual evaluation failed: {e}")
     
     return evaluation_results
+
+
+def generate_comprehensive_analysis(evaluation_results, output_dir):
+    """Generate comprehensive analysis with charts and statistics."""
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import pandas as pd
+    import numpy as np
+    from pathlib import Path
+    
+    # Set style
+    plt.style.use('default')
+    sns.set_palette("husl")
+    
+    # Prepare data
+    data = []
+    for repo_name, results in evaluation_results.items():
+        for result in results:
+            data.append({
+                'Repository': repo_name,
+                'File': Path(result.extraction_result.file_path).stem,
+                'Overall_Score': result.overall_score,
+                'Character_Similarity': result.content_similarity.character_similarity,
+                'Word_Similarity': result.content_similarity.word_similarity,
+                'Sentence_Similarity': result.content_similarity.sentence_similarity,
+                'Word_Overlap': result.content_similarity.word_overlap,
+                'ROUGE_Score': result.content_similarity.rouge_score,
+                'BLEU_Score': result.content_similarity.bleu_score,
+                'Header_Accuracy': result.structure_accuracy.header_accuracy,
+                'List_Accuracy': result.structure_accuracy.list_accuracy,
+                'Section_Order': result.structure_accuracy.section_order_accuracy,
+                'Paragraph_Accuracy': result.structure_accuracy.paragraph_accuracy,
+                'Table_Content': result.table_quality.content_accuracy,
+                'Table_Structure': result.table_quality.structure_preservation,
+                'Table_Format': result.table_quality.format_consistency,
+                'Bold_Accuracy': result.formatting_preservation.bold_accuracy,
+                'Italic_Accuracy': result.formatting_preservation.italic_accuracy,
+                'Link_Accuracy': result.formatting_preservation.link_accuracy,
+                'Image_Accuracy': result.formatting_preservation.image_accuracy
+            })
+    
+    df = pd.DataFrame(data)
+    
+    # 1. Overall Score Comparison
+    plt.figure(figsize=(12, 8))
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 12))
+    
+    # Overall scores
+    overall_scores = df.groupby('Repository')['Overall_Score'].mean().sort_values(ascending=False)
+    colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD']
+    bar_colors = [colors[i % len(colors)] for i in range(len(overall_scores))]
+    bars1 = ax1.bar(overall_scores.index, overall_scores.values, color=bar_colors)
+    ax1.set_title('📈 Overall Score Comparison', fontsize=14, fontweight='bold')
+    ax1.set_ylabel('Score')
+    ax1.set_ylim(0, 1)
+    for bar, score in zip(bars1, overall_scores.values):
+        ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01, 
+                f'{score:.3f}', ha='center', va='bottom', fontweight='bold')
+    
+    # Content similarity metrics (Levenshtein-based)
+    content_metrics = ['Character_Similarity', 'Word_Similarity', 'Sentence_Similarity']
+    content_data = df.groupby('Repository')[content_metrics].mean()
+    content_data.plot(kind='bar', ax=ax2, width=0.8)
+    ax2.set_title('📝 Content Similarity (Levenshtein)', fontsize=14, fontweight='bold')
+    ax2.set_ylabel('Score')
+    ax2.legend(title='Metrics')
+    ax2.tick_params(axis='x', rotation=45)
+    
+    # Structure accuracy metrics
+    structure_metrics = ['Header_Accuracy', 'List_Accuracy', 'Section_Order', 'Paragraph_Accuracy']
+    structure_data = df.groupby('Repository')[structure_metrics].mean()
+    structure_data.plot(kind='bar', ax=ax3, width=0.8)
+    ax3.set_title('🏗️ Structure Accuracy Metrics', fontsize=14, fontweight='bold')
+    ax3.set_ylabel('Score')
+    ax3.legend(title='Metrics')
+    ax3.tick_params(axis='x', rotation=45)
+    
+    # Table quality metrics
+    table_metrics = ['Table_Content', 'Table_Structure', 'Table_Format']
+    table_data = df.groupby('Repository')[table_metrics].mean()
+    table_data.plot(kind='bar', ax=ax4, width=0.8)
+    ax4.set_title('📊 Table Quality Metrics', fontsize=14, fontweight='bold')
+    ax4.set_ylabel('Score')
+    ax4.legend(title='Metrics')
+    ax4.tick_params(axis='x', rotation=45)
+    
+    plt.tight_layout()
+    plt.savefig(output_dir / 'comprehensive_analysis.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    # 2. Detailed Metrics Heatmap
+    plt.figure(figsize=(14, 10))
+    metrics_for_heatmap = [
+        'Character_Similarity', 'Word_Similarity', 'Sentence_Similarity', 'Word_Overlap', 'ROUGE_Score', 'BLEU_Score',
+        'Header_Accuracy', 'List_Accuracy', 'Section_Order', 'Paragraph_Accuracy',
+        'Table_Content', 'Table_Structure', 'Table_Format',
+        'Bold_Accuracy', 'Italic_Accuracy', 'Link_Accuracy', 'Image_Accuracy'
+    ]
+    
+    heatmap_data = df.groupby('Repository')[metrics_for_heatmap].mean()
+    
+    # Create custom colormap
+    colors = ['#FF6B6B', '#FFE66D', '#4ECDC4']
+    n_bins = 100
+    cmap = sns.blend_palette(colors, n_colors=n_bins, as_cmap=True)
+    
+    sns.heatmap(heatmap_data.T, annot=True, fmt='.3f', cmap=cmap, 
+                cbar_kws={'label': 'Score'}, linewidths=0.5)
+    plt.title('🔥 Detailed Metrics Heatmap', fontsize=16, fontweight='bold', pad=20)
+    plt.xlabel('Repository', fontsize=12, fontweight='bold')
+    plt.ylabel('Metrics', fontsize=12, fontweight='bold')
+    plt.xticks(rotation=45)
+    plt.yticks(rotation=0)
+    plt.tight_layout()
+    plt.savefig(output_dir / 'metrics_heatmap.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    # 3. Score Distribution
+    plt.figure(figsize=(15, 10))
+    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+    axes = axes.flatten()
+    
+    metrics_dist = ['Overall_Score', 'Character_Similarity', 'Word_Similarity', 
+                   'Header_Accuracy', 'Table_Content', 'Bold_Accuracy']
+    
+    for i, metric in enumerate(metrics_dist):
+        for repo in df['Repository'].unique():
+            repo_data = df[df['Repository'] == repo][metric]
+            axes[i].hist(repo_data, alpha=0.7, label=repo, bins=10)
+        
+        axes[i].set_title(f'📊 {metric.replace("_", " ")} Distribution', fontweight='bold')
+        axes[i].set_xlabel('Score')
+        axes[i].set_ylabel('Frequency')
+        axes[i].legend()
+        axes[i].grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(output_dir / 'score_distributions.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    # 4. Performance Ranking
+    plt.figure(figsize=(12, 8))
+    
+    # Calculate average scores for each metric category
+    category_scores = {}
+    for repo in df['Repository'].unique():
+        repo_data = df[df['Repository'] == repo]
+        category_scores[repo] = {
+            'Content': repo_data[['Character_Similarity', 'Word_Similarity', 'Sentence_Similarity']].mean().mean(),
+            'Structure': repo_data[['Header_Accuracy', 'List_Accuracy', 'Section_Order', 'Paragraph_Accuracy']].mean().mean(),
+            'Table': repo_data[['Table_Content', 'Table_Structure', 'Table_Format']].mean().mean(),
+            'Formatting': repo_data[['Bold_Accuracy', 'Italic_Accuracy', 'Link_Accuracy', 'Image_Accuracy']].mean().mean()
+        }
+    
+    category_df = pd.DataFrame(category_scores).T
+    
+    # Create radar chart
+    categories = list(category_df.columns)
+    N = len(categories)
+    
+    angles = [n / float(N) * 2 * np.pi for n in range(N)]
+    angles += angles[:1]
+    
+    ax = plt.subplot(111, projection='polar')
+    
+    colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD']
+    for i, repo in enumerate(category_df.index):
+        values = category_df.loc[repo].values.flatten().tolist()
+        values += values[:1]
+        color = colors[i % len(colors)]  # Use modulo to avoid index error
+        ax.plot(angles, values, 'o-', linewidth=2, label=repo, color=color)
+        ax.fill(angles, values, alpha=0.25, color=color)
+    
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(categories)
+    ax.set_ylim(0, 1)
+    ax.set_title('🎯 Performance Radar Chart', size=16, fontweight='bold', pad=20)
+    ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.0))
+    plt.tight_layout()
+    plt.savefig(output_dir / 'performance_radar.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    # 5. Generate comprehensive statistics table
+    stats_data = []
+    for repo in df['Repository'].unique():
+        repo_data = df[df['Repository'] == repo]
+        
+        stats = {
+            'Repository': repo,
+            'Files_Evaluated': len(repo_data),
+            'Overall_Score_Mean': repo_data['Overall_Score'].mean(),
+            'Overall_Score_Std': repo_data['Overall_Score'].std(),
+            'Overall_Score_Min': repo_data['Overall_Score'].min(),
+            'Overall_Score_Max': repo_data['Overall_Score'].max(),
+            'Content_Similarity_Mean': repo_data[['Character_Similarity', 'Word_Similarity', 'Sentence_Similarity']].mean().mean(),
+            'Structure_Accuracy_Mean': repo_data[['Header_Accuracy', 'List_Accuracy', 'Section_Order', 'Paragraph_Accuracy']].mean().mean(),
+            'Table_Quality_Mean': repo_data[['Table_Content', 'Table_Structure', 'Table_Format']].mean().mean(),
+            'Formatting_Preservation_Mean': repo_data[['Bold_Accuracy', 'Italic_Accuracy', 'Link_Accuracy', 'Image_Accuracy']].mean().mean(),
+            'Best_Performing_Metric': repo_data[metrics_for_heatmap].mean().idxmax(),
+            'Worst_Performing_Metric': repo_data[metrics_for_heatmap].mean().idxmin(),
+            'Consistency_Score': 1 - repo_data['Overall_Score'].std()  # Lower std = higher consistency
+        }
+        stats_data.append(stats)
+    
+    stats_df = pd.DataFrame(stats_data)
+    
+    # Save statistics to CSV
+    stats_df.to_csv(output_dir / 'comprehensive_statistics.csv', index=False)
+    
+    # Create formatted statistics table
+    stats_table = stats_df.round(3)
+    stats_table.to_html(output_dir / 'comprehensive_statistics.html', index=False, 
+                       classes='table table-striped table-bordered')
+    
+    # 6. Generate AI Analysis Report
+    generate_ai_analysis_report(stats_df, output_dir)
+    
+    print(f"📊 Comprehensive analysis generated:")
+    print(f"  - Charts: comprehensive_analysis.png, metrics_heatmap.png, score_distributions.png, performance_radar.png")
+    print(f"  - Statistics: comprehensive_statistics.csv, comprehensive_statistics.html")
+    print(f"  - AI Analysis: ai_analysis_report.txt")
+
+
+def generate_ai_analysis_report(stats_df, output_dir):
+    """Generate AI analysis report for easy consumption."""
+    
+    # Find best and worst performers
+    best_overall = stats_df.loc[stats_df['Overall_Score_Mean'].idxmax()]
+    worst_overall = stats_df.loc[stats_df['Overall_Score_Mean'].idxmin()]
+    
+    best_content = stats_df.loc[stats_df['Content_Similarity_Mean'].idxmax()]
+    best_structure = stats_df.loc[stats_df['Structure_Accuracy_Mean'].idxmax()]
+    best_table = stats_df.loc[stats_df['Table_Quality_Mean'].idxmax()]
+    best_formatting = stats_df.loc[stats_df['Formatting_Preservation_Mean'].idxmax()]
+    
+    report = f"""
+🤖 AI ANALYSIS REPORT
+{'='*60}
+
+📊 OVERALL PERFORMANCE SUMMARY
+{'-'*40}
+• Best Overall Repository: {best_overall['Repository']} (Score: {best_overall['Overall_Score_Mean']:.3f})
+• Worst Overall Repository: {worst_overall['Repository']} (Score: {worst_overall['Overall_Score_Mean']:.3f})
+• Performance Range: {stats_df['Overall_Score_Mean'].min():.3f} - {stats_df['Overall_Score_Mean'].max():.3f}
+
+🏆 CATEGORY LEADERS
+{'-'*40}
+• Content Similarity: {best_content['Repository']} (Score: {best_content['Content_Similarity_Mean']:.3f})
+• Structure Accuracy: {best_structure['Repository']} (Score: {best_structure['Structure_Accuracy_Mean']:.3f})
+• Table Quality: {best_table['Repository']} (Score: {best_table['Table_Quality_Mean']:.3f})
+• Formatting Preservation: {best_formatting['Repository']} (Score: {best_formatting['Formatting_Preservation_Mean']:.3f})
+
+📈 DETAILED METRICS ANALYSIS
+{'-'*40}
+"""
+    
+    for _, repo in stats_df.iterrows():
+        report += f"""
+{repo['Repository'].upper()}:
+• Overall Score: {repo['Overall_Score_Mean']:.3f} (±{repo['Overall_Score_Std']:.3f})
+• Content Similarity: {repo['Content_Similarity_Mean']:.3f}
+• Structure Accuracy: {repo['Structure_Accuracy_Mean']:.3f}
+• Table Quality: {repo['Table_Quality_Mean']:.3f}
+• Formatting Preservation: {repo['Formatting_Preservation_Mean']:.3f}
+• Best Metric: {repo['Best_Performing_Metric']}
+• Worst Metric: {repo['Worst_Performing_Metric']}
+• Consistency: {repo['Consistency_Score']:.3f}
+"""
+    
+    report += f"""
+🎯 KEY INSIGHTS
+{'-'*40}
+• Most Consistent: {stats_df.loc[stats_df['Consistency_Score'].idxmax(), 'Repository']}
+• Most Variable: {stats_df.loc[stats_df['Consistency_Score'].idxmin(), 'Repository']}
+• Average Performance Gap: {stats_df['Overall_Score_Mean'].max() - stats_df['Overall_Score_Mean'].min():.3f}
+
+📋 RECOMMENDATIONS FOR AI ANALYSIS
+{'-'*40}
+1. Focus on repositories with high consistency scores for reliable performance
+2. Consider category-specific strengths for specialized use cases
+3. Analyze worst-performing metrics for improvement opportunities
+4. Compare performance across different file types and content structures
+5. Use radar charts to identify balanced vs. specialized approaches
+
+📊 DATA FORMAT FOR AI PROCESSING
+{'-'*40}
+The comprehensive_statistics.csv file contains all numerical data for:
+• Statistical analysis (mean, std, min, max)
+• Performance ranking
+• Category comparisons
+• Consistency metrics
+• Best/worst performing metrics per repository
+"""
+    
+    with open(output_dir / 'ai_analysis_report.txt', 'w', encoding='utf-8') as f:
+        f.write(report)
 
 
 def main():
@@ -358,6 +691,8 @@ Examples:
                                help='Output directory for results')
     evaluate_parser.add_argument('--enable-manual-eval', action='store_true',
                                help='Enable manual evaluation interface')
+    evaluate_parser.add_argument('--fast', action='store_true',
+                               help='Fast mode: skip ROUGE and BLEU calculations for speed')
     evaluate_parser.add_argument('--host', default='localhost', help='Server host')
     evaluate_parser.add_argument('--port', type=int, default=5000, help='Server port')
     evaluate_parser.add_argument('--no-auto-open', dest='auto_open', action='store_false',

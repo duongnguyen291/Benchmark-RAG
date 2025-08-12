@@ -1,0 +1,102 @@
+
+🤖 AI ANALYSIS REPORT
+============================================================
+
+📊 OVERALL PERFORMANCE SUMMARY
+----------------------------------------
+• Best Overall Repository: parsr (Score: 0.706)
+• Worst Overall Repository: unstructured (Score: 0.537)
+• Performance Range: 0.537 - 0.706
+
+🏆 CATEGORY LEADERS
+----------------------------------------
+• Content Similarity: parsr (Score: 0.728)
+• Structure Accuracy: marker_advance (Score: 0.894)
+• Table Quality: dolphin (Score: 0.751)
+• Formatting Preservation: parsr (Score: 1.529)
+
+📈 DETAILED METRICS ANALYSIS
+----------------------------------------
+
+DOCLING:
+• Overall Score: 0.605 (±0.116)
+• Content Similarity: 0.580
+• Structure Accuracy: 0.822
+• Table Quality: 0.628
+• Formatting Preservation: 0.544
+• Best Metric: List_Accuracy
+• Worst Metric: ROUGE_Score
+• Consistency: 0.884
+
+DOLPHIN:
+• Overall Score: 0.543 (±0.016)
+• Content Similarity: 0.280
+• Structure Accuracy: 0.750
+• Table Quality: 0.751
+• Formatting Preservation: 0.750
+• Best Metric: Section_Order
+• Worst Metric: ROUGE_Score
+• Consistency: 0.984
+
+MARKER_ADVANCE:
+• Overall Score: 0.638 (±0.112)
+• Content Similarity: 0.413
+• Structure Accuracy: 0.894
+• Table Quality: 0.663
+• Formatting Preservation: 0.745
+• Best Metric: List_Accuracy
+• Worst Metric: ROUGE_Score
+• Consistency: 0.888
+
+MARKER_BASIC:
+• Overall Score: 0.683 (±0.112)
+• Content Similarity: 0.619
+• Structure Accuracy: 0.715
+• Table Quality: 0.648
+• Formatting Preservation: 0.997
+• Best Metric: List_Accuracy
+• Worst Metric: ROUGE_Score
+• Consistency: 0.888
+
+PARSR:
+• Overall Score: 0.706 (±0.169)
+• Content Similarity: 0.728
+• Structure Accuracy: 0.712
+• Table Quality: 0.581
+• Formatting Preservation: 1.529
+• Best Metric: Bold_Accuracy
+• Worst Metric: ROUGE_Score
+• Consistency: 0.831
+
+UNSTRUCTURED:
+• Overall Score: 0.537 (±0.120)
+• Content Similarity: 0.648
+• Structure Accuracy: 0.628
+• Table Quality: 0.436
+• Formatting Preservation: 0.544
+• Best Metric: Table_Format
+• Worst Metric: ROUGE_Score
+• Consistency: 0.880
+
+🎯 KEY INSIGHTS
+----------------------------------------
+• Most Consistent: dolphin
+• Most Variable: parsr
+• Average Performance Gap: 0.169
+
+📋 RECOMMENDATIONS FOR AI ANALYSIS
+----------------------------------------
+1. Focus on repositories with high consistency scores for reliable performance
+2. Consider category-specific strengths for specialized use cases
+3. Analyze worst-performing metrics for improvement opportunities
+4. Compare performance across different file types and content structures
+5. Use radar charts to identify balanced vs. specialized approaches
+
+📊 DATA FORMAT FOR AI PROCESSING
+----------------------------------------
+The comprehensive_statistics.csv file contains all numerical data for:
+• Statistical analysis (mean, std, min, max)
+• Performance ranking
+• Category comparisons
+• Consistency metrics
+• Best/worst performing metrics per repository

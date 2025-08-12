@@ -1,0 +1,550 @@
+{
+    "docling": [
+        {
+            "filename": "[123doc] - File4",
+            "Precision": 0.9847094801223242,
+            "Recall": 0.9938271604938271,
+            "F1": 0.989247311827957,
+            "Accuracy": 0.5920818505338078,
+            "processing_time": 1.7390820980072021
+        },
+        {
+            "filename": "[123doc] - File3",
+            "Precision": 0.603,
+            "Recall": 0.9013452914798207,
+            "F1": 0.7225883762732176,
+            "Accuracy": 0.8038822985672469,
+            "processing_time": 10.919625043869019
+        },
+        {
+            "filename": "[123doc] - File12",
+            "Precision": 0.7974683544303798,
+            "Recall": 0.693,
+            "F1": 0.7415730337078652,
+            "Accuracy": 0.5952807160292921,
+            "processing_time": 11.53067421913147
+        },
+        {
+            "filename": "[123doc] - File1",
+            "Precision": 0.494,
+            "Recall": 0.494,
+            "F1": 0.494,
+            "Accuracy": 0.0,
+            "processing_time": 11.714203596115112
+        },
+        {
+            "filename": "[123doc] - File5",
+            "Precision": 0.9089615931721194,
+            "Recall": 0.639,
+            "F1": 0.7504403992953611,
+            "Accuracy": 0.3463466666666667,
+            "processing_time": 9.784181594848633
+        },
+        {
+            "filename": "[123doc] - File10",
+            "Precision": 0.729,
+            "Recall": 0.729,
+            "F1": 0.729,
+            "Accuracy": 0.5281254116717166,
+            "processing_time": 12.581347703933716
+        },
+        {
+            "filename": "[123doc] - File13",
+            "Precision": 0.878,
+            "Recall": 0.878,
+            "F1": 0.878,
+            "Accuracy": 0.31604420424296203,
+            "processing_time": 13.885324954986572
+        },
+        {
+            "filename": "[123doc] - File11",
+            "Precision": 0.966,
+            "Recall": 0.966,
+            "F1": 0.966,
+            "Accuracy": 0.8211621515508442,
+            "processing_time": 14.798334836959839
+        },
+        {
+            "filename": "[123doc] - File2",
+            "Precision": 0.737,
+            "Recall": 0.737,
+            "F1": 0.737,
+            "Accuracy": 0.3844566268945501,
+            "processing_time": 17.56276297569275
+        },
+        {
+            "filename": "[123doc] - File8",
+            "Precision": 0.5383304940374787,
+            "Recall": 0.42416107382550333,
+            "F1": 0.47447447447447444,
+            "Accuracy": 0.409256294571387,
+            "processing_time": 6.795439958572388
+        },
+        {
+            "filename": "[123doc] - File6",
+            "Precision": 0.614,
+            "Recall": 0.614,
+            "F1": 0.614,
+            "Accuracy": 0.7806391560657773,
+            "processing_time": 11.083116054534912
+        },
+        {
+            "filename": "[123doc] - File9",
+            "Precision": 0.685,
+            "Recall": 0.685,
+            "F1": 0.685,
+            "Accuracy": 0.0,
+            "processing_time": 11.253171682357788
+        },
+        {
+            "filename": "[123doc] - File7",
+            "Precision": 0.9876923076923076,
+            "Recall": 0.963,
+            "F1": 0.9751898734177215,
+            "Accuracy": 0.5487885608367536,
+            "processing_time": 13.15733528137207
+        }
+    ],
+    "dolphin": [
+        {
+            "filename": "[123doc] - File1",
+            "Precision": 0.6052631578947368,
+            "Recall": 0.115,
+            "F1": 0.19327731092436976,
+            "Accuracy": 0.0,
+            "processing_time": 2.3520092964172363
+        },
+        {
+            "filename": "[123doc] - File10",
+            "Precision": 0.886,
+            "Recall": 0.886,
+            "F1": 0.886,
+            "Accuracy": 0.40620132037682666,
+            "processing_time": 15.058617353439331
+        }
+    ],
+    "marker_advance": [
+        {
+            "filename": "[123doc] - File12",
+            "Precision": 0.8505494505494505,
+            "Recall": 0.387,
+            "F1": 0.5319587628865978,
+            "Accuracy": 0.0,
+            "processing_time": 4.56599235534668
+        },
+        {
+            "filename": "[123doc] - File3",
+            "Precision": 0.9117647058823529,
+            "Recall": 0.13901345291479822,
+            "F1": 0.24124513618677043,
+            "Accuracy": 0.0,
+            "processing_time": 1.091364860534668
+        },
+        {
+            "filename": "[123doc] - File4",
+            "Precision": 1.0,
+            "Recall": 0.9753086419753086,
+            "F1": 0.9875,
+            "Accuracy": 0.5003417634996582,
+            "processing_time": 0.46340227127075195
+        },
+        {
+            "filename": "[123doc] - File10",
+            "Precision": 0.8477987421383648,
+            "Recall": 0.674,
+            "F1": 0.750974930362117,
+            "Accuracy": 0.420482122633878,
+            "processing_time": 10.02423644065857
+        },
+        {
+            "filename": "[123doc] - File1",
+            "Precision": 0.872,
+            "Recall": 0.872,
+            "F1": 0.872,
+            "Accuracy": 0.0,
+            "processing_time": 13.565271615982056
+        },
+        {
+            "filename": "[123doc] - File11",
+            "Precision": 0.873,
+            "Recall": 0.873,
+            "F1": 0.8729999999999999,
+            "Accuracy": 0.0,
+            "processing_time": 15.255275249481201
+        },
+        {
+            "filename": "[123doc] - File13",
+            "Precision": 0.887,
+            "Recall": 0.887,
+            "F1": 0.887,
+            "Accuracy": 0.1819537658463833,
+            "processing_time": 10.996216058731079
+        },
+        {
+            "filename": "[123doc] - File8",
+            "Precision": 0.9135802469135802,
+            "Recall": 0.4966442953020134,
+            "F1": 0.6434782608695653,
+            "Accuracy": 0.4104815110401703,
+            "processing_time": 6.320734739303589
+        },
+        {
+            "filename": "[123doc] - File5",
+            "Precision": 0.9366438356164384,
+            "Recall": 0.547,
+            "F1": 0.6906565656565656,
+            "Accuracy": 0.3590053661854735,
+            "processing_time": 11.097538471221924
+        },
+        {
+            "filename": "[123doc] - File7",
+            "Precision": 0.9973958333333334,
+            "Recall": 0.766,
+            "F1": 0.8665158371040724,
+            "Accuracy": 0.0,
+            "processing_time": 13.371183395385742
+        },
+        {
+            "filename": "[123doc] - File2",
+            "Precision": 0.72,
+            "Recall": 0.72,
+            "F1": 0.72,
+            "Accuracy": 0.3310986555299117,
+            "processing_time": 16.727539777755737
+        },
+        {
+            "filename": "[123doc] - File9",
+            "Precision": 0.646,
+            "Recall": 0.646,
+            "F1": 0.646,
+            "Accuracy": 0.0,
+            "processing_time": 10.908368587493896
+        },
+        {
+            "filename": "[123doc] - File6",
+            "Precision": 0.9577464788732394,
+            "Recall": 0.884,
+            "F1": 0.9193967758710347,
+            "Accuracy": 0.5800326822815345,
+            "processing_time": 15.265654802322388
+        }
+    ],
+    "marker_basic": [
+        {
+            "filename": "[123doc] - File4",
+            "Precision": 1.0,
+            "Recall": 1.0,
+            "F1": 1.0,
+            "Accuracy": 0.5249487354750513,
+            "processing_time": 0.995673656463623
+        },
+        {
+            "filename": "[123doc] - File1",
+            "Precision": 0.802,
+            "Recall": 0.802,
+            "F1": 0.802,
+            "Accuracy": 0.0,
+            "processing_time": 12.097467422485352
+        },
+        {
+            "filename": "[123doc] - File12",
+            "Precision": 0.7970011534025375,
+            "Recall": 0.691,
+            "F1": 0.740224959828602,
+            "Accuracy": 0.46725107509096925,
+            "processing_time": 9.270405054092407
+        },
+        {
+            "filename": "[123doc] - File10",
+            "Precision": 0.918,
+            "Recall": 0.918,
+            "F1": 0.918,
+            "Accuracy": 0.5123879109930256,
+            "processing_time": 14.940521240234375
+        },
+        {
+            "filename": "[123doc] - File11",
+            "Precision": 0.952,
+            "Recall": 0.952,
+            "F1": 0.952,
+            "Accuracy": 0.7268516374079392,
+            "processing_time": 13.987869024276733
+        },
+        {
+            "filename": "[123doc] - File13",
+            "Precision": 0.847,
+            "Recall": 0.847,
+            "F1": 0.847,
+            "Accuracy": 0.2909685328974254,
+            "processing_time": 11.256316184997559
+        },
+        {
+            "filename": "[123doc] - File3",
+            "Precision": 0.9926253687315634,
+            "Recall": 1.0,
+            "F1": 0.9962990377498149,
+            "Accuracy": 0.6862681744749596,
+            "processing_time": 11.061042785644531
+        },
+        {
+            "filename": "[123doc] - File5",
+            "Precision": 0.963,
+            "Recall": 0.963,
+            "F1": 0.963,
+            "Accuracy": 0.6661997835360031,
+            "processing_time": 12.602709293365479
+        },
+        {
+            "filename": "[123doc] - File8",
+            "Precision": 0.8150537634408602,
+            "Recall": 0.508724832214765,
+            "F1": 0.6264462809917355,
+            "Accuracy": 0.3679040693966067,
+            "processing_time": 6.473742246627808
+        },
+        {
+            "filename": "[123doc] - File2",
+            "Precision": 0.747,
+            "Recall": 0.747,
+            "F1": 0.747,
+            "Accuracy": 0.4056111028204746,
+            "processing_time": 15.574140787124634
+        },
+        {
+            "filename": "[123doc] - File7",
+            "Precision": 0.9877899877899878,
+            "Recall": 0.809,
+            "F1": 0.8894997251236942,
+            "Accuracy": 0.6278080326752893,
+            "processing_time": 11.841537952423096
+        },
+        {
+            "filename": "[123doc] - File6",
+            "Precision": 1.0,
+            "Recall": 1.0,
+            "F1": 1.0,
+            "Accuracy": 0.9824355207313091,
+            "processing_time": 14.058926820755005
+        },
+        {
+            "filename": "[123doc] - File9",
+            "Precision": 0.693,
+            "Recall": 0.693,
+            "F1": 0.693,
+            "Accuracy": 0.0,
+            "processing_time": 11.728276014328003
+        }
+    ],
+    "parsr": [
+        {
+            "filename": "[123doc] - File1",
+            "Precision": 0.9725050916496945,
+            "Recall": 0.955,
+            "F1": 0.9636730575176589,
+            "Accuracy": 0.20056657223796034,
+            "processing_time": 11.176822423934937
+        },
+        {
+            "filename": "[123doc] - File4",
+            "Precision": 1.0,
+            "Recall": 1.0,
+            "F1": 1.0,
+            "Accuracy": 0.49069539666993145,
+            "processing_time": 0.1581745147705078
+        },
+        {
+            "filename": "[123doc] - File12",
+            "Precision": 0.7946943483275664,
+            "Recall": 0.689,
+            "F1": 0.7380824852704875,
+            "Accuracy": 0.5587878787878788,
+            "processing_time": 9.349581241607666
+        },
+        {
+            "filename": "[123doc] - File3",
+            "Precision": 1.0,
+            "Recall": 1.0,
+            "F1": 1.0,
+            "Accuracy": 0.9805650824759105,
+            "processing_time": 4.934753656387329
+        },
+        {
+            "filename": "[123doc] - File10",
+            "Precision": 0.964,
+            "Recall": 0.964,
+            "F1": 0.964,
+            "Accuracy": 0.4123226344942712,
+            "processing_time": 12.852023124694824
+        },
+        {
+            "filename": "[123doc] - File2",
+            "Precision": 0.753,
+            "Recall": 0.753,
+            "F1": 0.753,
+            "Accuracy": 0.0,
+            "processing_time": 7.720561742782593
+        },
+        {
+            "filename": "[123doc] - File11",
+            "Precision": 0.973,
+            "Recall": 0.973,
+            "F1": 0.973,
+            "Accuracy": 0.8436436436436436,
+            "processing_time": 11.311948299407959
+        },
+        {
+            "filename": "[123doc] - File13",
+            "Precision": 0.927,
+            "Recall": 0.927,
+            "F1": 0.927,
+            "Accuracy": 0.48209997207483946,
+            "processing_time": 13.383027076721191
+        },
+        {
+            "filename": "[123doc] - File8",
+            "Precision": 1.0,
+            "Recall": 0.5369127516778524,
+            "F1": 0.6986899563318777,
+            "Accuracy": 0.5537765402018796,
+            "processing_time": 8.930821895599365
+        },
+        {
+            "filename": "[123doc] - File5",
+            "Precision": 0.969,
+            "Recall": 0.969,
+            "F1": 0.969,
+            "Accuracy": 0.7027110052991322,
+            "processing_time": 13.205902814865112
+        },
+        {
+            "filename": "[123doc] - File6",
+            "Precision": 1.0,
+            "Recall": 1.0,
+            "F1": 1.0,
+            "Accuracy": 0.9639764690329831,
+            "processing_time": 14.168260335922241
+        },
+        {
+            "filename": "[123doc] - File7",
+            "Precision": 0.9898580121703854,
+            "Recall": 0.976,
+            "F1": 0.9828801611278952,
+            "Accuracy": 0.5942320590207915,
+            "processing_time": 12.131924152374268
+        },
+        {
+            "filename": "[123doc] - File9",
+            "Precision": 0.729,
+            "Recall": 0.729,
+            "F1": 0.729,
+            "Accuracy": 0.0,
+            "processing_time": 12.177474975585938
+        }
+    ],
+    "unstructured": [
+        {
+            "filename": "[123doc] - File10",
+            "Precision": 0.952,
+            "Recall": 0.952,
+            "F1": 0.952,
+            "Accuracy": 0.5809597523219814,
+            "processing_time": 11.464873552322388
+        },
+        {
+            "filename": "[123doc] - File4",
+            "Precision": 1.0,
+            "Recall": 1.0,
+            "F1": 1.0,
+            "Accuracy": 0.18530524041058888,
+            "processing_time": 0.543220043182373
+        },
+        {
+            "filename": "[123doc] - File1",
+            "Precision": 0.963855421686747,
+            "Recall": 0.96,
+            "F1": 0.9619238476953907,
+            "Accuracy": 0.2615066691715198,
+            "processing_time": 12.30185842514038
+        },
+        {
+            "filename": "[123doc] - File11",
+            "Precision": 0.953,
+            "Recall": 0.953,
+            "F1": 0.953,
+            "Accuracy": 0.7653371127758656,
+            "processing_time": 10.233193635940552
+        },
+        {
+            "filename": "[123doc] - File12",
+            "Precision": 0.7914252607184241,
+            "Recall": 0.683,
+            "F1": 0.7332259796027912,
+            "Accuracy": 0.6123693379790941,
+            "processing_time": 6.773227691650391
+        },
+        {
+            "filename": "[123doc] - File13",
+            "Precision": 0.907,
+            "Recall": 0.907,
+            "F1": 0.907,
+            "Accuracy": 0.7718465796757612,
+            "processing_time": 9.90126085281372
+        },
+        {
+            "filename": "[123doc] - File3",
+            "Precision": 0.978448275862069,
+            "Recall": 1.0,
+            "F1": 0.9891067538126361,
+            "Accuracy": 0.9436911788163982,
+            "processing_time": 8.404646158218384
+        },
+        {
+            "filename": "[123doc] - File2",
+            "Precision": 0.759,
+            "Recall": 0.759,
+            "F1": 0.7590000000000001,
+            "Accuracy": 0.0,
+            "processing_time": 9.409218788146973
+        },
+        {
+            "filename": "[123doc] - File8",
+            "Precision": 1.0,
+            "Recall": 0.538255033557047,
+            "F1": 0.699825479930192,
+            "Accuracy": 0.0,
+            "processing_time": 5.3573503494262695
+        },
+        {
+            "filename": "[123doc] - File5",
+            "Precision": 0.9067909454061251,
+            "Recall": 0.681,
+            "F1": 0.777841233580811,
+            "Accuracy": 0.5737137203166227,
+            "processing_time": 8.03872013092041
+        },
+        {
+            "filename": "[123doc] - File7",
+            "Precision": 0.9898477157360406,
+            "Recall": 0.975,
+            "F1": 0.982367758186398,
+            "Accuracy": 0.5952155696715773,
+            "processing_time": 7.392330169677734
+        },
+        {
+            "filename": "[123doc] - File9",
+            "Precision": 0.725,
+            "Recall": 0.725,
+            "F1": 0.7250000000000001,
+            "Accuracy": 0.0,
+            "processing_time": 4.8738112449646
+        },
+        {
+            "filename": "[123doc] - File6",
+            "Precision": 0.996,
+            "Recall": 0.996,
+            "F1": 0.996,
+            "Accuracy": 0.8806545405368855,
+            "processing_time": 7.787919282913208
+        }
+    ]
+}

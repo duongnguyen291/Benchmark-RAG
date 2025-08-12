@@ -134,13 +134,7 @@ python main.py evaluate --ground-truth ./your_data/ground_truth --extracted ./yo
 python main.py evaluate --ground-truth ./your_data/ground_truth --extracted ./your_data/extracted_files --output ./results --enable-manual-eval
 
 # Example with specific options
-python main.py evaluate \
-  --ground-truth ./ground_truth \
-  --extracted ./extracted_files \
-  --output ./evaluation_results \
-  --enable-manual-eval \
-  --host localhost \
-  --port 5000
+python main.py evaluate --ground-truth ./your_data/ground_truth --extracted ./your_data/extracted_files --output ./evaluation_results --enable-manual-eval --host localhost --port 5000
 ```
 
 ### 3. Test with Example

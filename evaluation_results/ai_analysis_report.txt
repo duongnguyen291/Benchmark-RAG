@@ -1,0 +1,92 @@
+
+🤖 AI ANALYSIS REPORT
+============================================================
+
+📊 OVERALL PERFORMANCE SUMMARY
+----------------------------------------
+• Best Overall Repository: marker_advance (Score: 0.804)
+• Worst Overall Repository: unstructured (Score: 0.632)
+• Performance Range: 0.632 - 0.804
+
+🏆 CATEGORY LEADERS
+----------------------------------------
+• Content Similarity: unstructured (Score: 0.954)
+• Structure Accuracy: marker_advance (Score: 0.894)
+• Table Quality: marker_advance (Score: 0.663)
+• Formatting Preservation: parsr (Score: 1.529)
+
+📈 DETAILED METRICS ANALYSIS
+----------------------------------------
+
+DOCLING:
+• Overall Score: 0.691 (±0.117)
+• Content Similarity: 0.787
+• Structure Accuracy: 0.822
+• Table Quality: 0.628
+• Formatting Preservation: 0.544
+• Best Metric: List_Accuracy
+• Worst Metric: Italic_Accuracy
+• Consistency: 0.883
+
+MARKER_ADVANCE:
+• Overall Score: 0.804 (±0.091)
+• Content Similarity: 0.773
+• Structure Accuracy: 0.894
+• Table Quality: 0.663
+• Formatting Preservation: 0.745
+• Best Metric: List_Accuracy
+• Worst Metric: Table_Format
+• Consistency: 0.909
+
+MARKER_BASIC:
+• Overall Score: 0.780 (±0.087)
+• Content Similarity: 0.893
+• Structure Accuracy: 0.715
+• Table Quality: 0.648
+• Formatting Preservation: 0.997
+• Best Metric: List_Accuracy
+• Worst Metric: Header_Accuracy
+• Consistency: 0.913
+
+PARSR:
+• Overall Score: 0.799 (±0.127)
+• Content Similarity: 0.953
+• Structure Accuracy: 0.712
+• Table Quality: 0.581
+• Formatting Preservation: 1.529
+• Best Metric: Bold_Accuracy
+• Worst Metric: Header_Accuracy
+• Consistency: 0.873
+
+UNSTRUCTURED:
+• Overall Score: 0.632 (±0.097)
+• Content Similarity: 0.954
+• Structure Accuracy: 0.628
+• Table Quality: 0.436
+• Formatting Preservation: 0.544
+• Best Metric: Table_Format
+• Worst Metric: Header_Accuracy
+• Consistency: 0.903
+
+🎯 KEY INSIGHTS
+----------------------------------------
+• Most Consistent: marker_basic
+• Most Variable: parsr
+• Average Performance Gap: 0.172
+
+📋 RECOMMENDATIONS FOR AI ANALYSIS
+----------------------------------------
+1. Focus on repositories with high consistency scores for reliable performance
+2. Consider category-specific strengths for specialized use cases
+3. Analyze worst-performing metrics for improvement opportunities
+4. Compare performance across different file types and content structures
+5. Use radar charts to identify balanced vs. specialized approaches
+
+📊 DATA FORMAT FOR AI PROCESSING
+----------------------------------------
+The comprehensive_statistics.csv file contains all numerical data for:
+• Statistical analysis (mean, std, min, max)
+• Performance ranking
+• Category comparisons
+• Consistency metrics
+• Best/worst performing metrics per repository
