@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Optimized Simple evaluate.py benchmark with performance improvements
+Optimized version of direct_evaluate_benchmark.py for better performance
 """
 
 import os
@@ -11,119 +11,142 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from statistics import mean
 import re
-from difflib import SequenceMatcher
+from scipy.spatial.distance import cdist
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import lru_cache
+import multiprocessing as mp
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
+# Optimized functions
+def extract_txt(txt_path):
+    with open(txt_path, 'r', encoding='utf-8') as f:
+        text = ' '.join(line.strip() for line in f)
+    return text
 
 def simple_word_tokenize(text):
-    """Simple word tokenization without external dependencies"""
+    """Simple word tokenization to replace underthesea.word_tokenize"""
     # Remove special characters and split by whitespace
     text = re.sub(r'[^\w\s]', ' ', text)
     words = text.split()
     return [word.lower() for word in words if word.strip()]
 
-def extract_txt(txt_path):
-    """Extract text from file"""
-    with open(txt_path, 'r', encoding='utf-8') as f:
-        text = ' '.join(line.strip() for line in f)
-    return text
-
 @lru_cache(maxsize=10000)
-def fast_similarity(str1, str2):
-    """Fast similarity using SequenceMatcher (much faster than Levenshtein)"""
+def levenshtein_ratio_cached(str1, str2):
+    """Cached version of Levenshtein ratio for repeated calculations"""
+    return levenshtein_ratio(str1, str2)
+
+def levenshtein_ratio(str1, str2):
+    """Calculate Levenshtein similarity ratio (replacement for Levenshtein.ratio)"""
+    if len(str1) < len(str2):
+        return levenshtein_ratio(str2, str1)
+    
+    if len(str2) == 0:
+        return 0.0
+    
+    # Early exit for exact matches
     if str1 == str2:
         return 1.0
-    if not str1 or not str2:
+    
+    # Early exit for very different lengths
+    if abs(len(str1) - len(str2)) > max(len(str1), len(str2)) * 0.5:
         return 0.0
-    return SequenceMatcher(None, str1, str2).ratio()
+    
+    previous_row = list(range(len(str2) + 1))
+    for i, c1 in enumerate(str1):
+        current_row = [i + 1]
+        for j, c2 in enumerate(str2):
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
+    
+    distance = previous_row[-1]
+    max_len = max(len(str1), len(str2))
+    if max_len == 0:
+        return 1.0
+    return 1.0 - (distance / max_len)
 
-def compute_sim_matrix_optimized(ex_tokens, gt_tokens, threshold=0.7):
-    """Optimized similarity matrix computation with early termination"""
-    matrix = np.zeros((len(ex_tokens), len(gt_tokens)))
+def compute_sim_matrix_optimized(ex_tokens, gt_tokens):
+    """
+    Optimized similarity matrix computation with early termination
+    """
+    # Limit matrix size for very large documents
+    max_tokens = 500  # Limit to prevent memory issues
+    
+    if len(ex_tokens) > max_tokens:
+        ex_tokens = ex_tokens[:max_tokens]
+    if len(gt_tokens) > max_tokens:
+        gt_tokens = gt_tokens[:max_tokens]
+    
+    # Use numpy for faster computation
+    ex_nump = np.array(ex_tokens)
+    gt_nump = np.array(gt_tokens)
     
     # Use vectorized operations where possible
-    for i, ex_token in enumerate(ex_tokens):
-        for j, gt_token in enumerate(gt_tokens):
-            # Early termination if tokens are identical
-            if ex_token == gt_token:
-                matrix[i, j] = 1.0
-            else:
-                # Only compute similarity if tokens are reasonably similar in length
-                len_diff = abs(len(ex_token) - len(gt_token))
-                max_len = max(len(ex_token), len(gt_token))
-                if max_len > 0 and len_diff / max_len < 0.5:  # Only compare if length difference is reasonable
-                    matrix[i, j] = fast_similarity(ex_token, gt_token)
+    matrix = cdist(ex_nump.reshape(-1, 1), gt_nump.reshape(-1, 1), 
+                   lambda x, y: levenshtein_ratio_cached(x[0], y[0]))
     
-    return matrix
+    return pd.DataFrame(data=matrix, index=ex_tokens, columns=gt_tokens)
 
 def compute_tpfp_optimized(matrix):
-    """Optimized True Positive and False Positive computation"""
-    tp = 0
-    fp = 0
-    rows, cols = matrix.shape
+    """
+    Optimized TP/FP computation using numpy operations
+    """
+    # Skip first row/column (document-level comparison)
+    sub_matrix = matrix.iloc[1:, 1:].values
     
-    # Use numpy operations for better performance
-    for x in range(1, rows):  # Skip first row (document level)
-        if np.any(matrix[x, 1:] > 0.7):  # Use numpy's any() for faster checking
-            tp += 1
-        else:
-            fp += 1
-    return tp, fp
+    # Vectorized operations
+    max_similarities = np.max(sub_matrix, axis=1)
+    tp = np.sum(max_similarities > 0.7)
+    fp = len(max_similarities) - tp
+    
+    return int(tp), int(fp)
 
-def compute_scores(tp, fp, gt_tokens):
-    """Compute Precision, Recall, F1"""
+def compute_scores(tp, fp, gttoken):
+    """
+    Function to compute the evaluation metrics.
+    """
     if tp + fp == 0:
-        prec = 0.0
-    else:
-        prec = min(tp / (tp + fp), 1.0)
+        return 0, 0, 0
     
-    if len(gt_tokens) == 0:
-        recall = 0.0
-    else:
-        recall = min(tp / len(gt_tokens), 1.0)
+    prec = min(tp / (tp + fp), 1.0)
+    recall = min(tp / gttoken, 1.0) if gttoken > 0 else 0
     
     if prec == 0 and recall == 0:
-        f1_score = 0.0
+        return 0, 0, 0
     else:
         f1_score = (2 * prec * recall) / (prec + recall)
-    
-    return f1_score, prec, recall
+        return f1_score, prec, recall
 
 def eval_optimized(ex_path, gt_path):
-    """Optimized evaluation using faster similarity measures"""
+    """Optimized evaluation function"""
     ex = extract_txt(ex_path)
     gt = extract_txt(gt_path)
 
     gt_tokens = simple_word_tokenize(gt)
     ex_tokens = simple_word_tokenize(ex)
-    
-    # Limit token count to prevent excessive computation
-    max_tokens = 1000  # Limit to prevent memory issues
-    if len(gt_tokens) > max_tokens:
-        gt_tokens = gt_tokens[:max_tokens]
-    if len(ex_tokens) > max_tokens:
-        ex_tokens = ex_tokens[:max_tokens]
+    num_gt_tokens = len(gt_tokens)
     
     # Add document-level comparison
-    gt_tokens = [gt] + gt_tokens
-    ex_tokens = [ex] + ex_tokens
-    
+    gt = [gt]
+    ex = [ex]
+    gt_tokens = gt + gt_tokens
+    ex_tokens = ex + ex_tokens
+
     matrix = compute_sim_matrix_optimized(ex_tokens, gt_tokens)
     tp, fp = compute_tpfp_optimized(matrix)
-    f1_score, prec, recall = compute_scores(tp, fp, gt_tokens[1:])  # Exclude document level
-    acc = float(matrix[0, 0])  # Document-level accuracy
+    f1_score, prec, recall = compute_scores(tp, fp, num_gt_tokens)
+    acc = float(matrix.iloc[0, 0])
 
     return f1_score, prec, recall, acc
 
 def process_single_file(args):
     """Process a single file for parallel execution"""
-    repo_folder, gt_file, repo_name = args
-    file_name = gt_file.stem
-    extracted_file = repo_folder / f"{file_name}.md"
+    repo_name, gt_file, extracted_file = args
     
     if not extracted_file.exists():
-        return repo_name, file_name, None, "No extracted file found"
+        return repo_name, None, f"File not found: {extracted_file.name}"
     
     try:
         start_time = time.time()
@@ -131,27 +154,27 @@ def process_single_file(args):
         processing_time = time.time() - start_time
         
         result = {
-            'filename': file_name,
+            'filename': gt_file.stem,
             'Precision': prec,
             'Recall': recall,
             'F1': f1_score,
             'Accuracy': acc,
-            'processing_time': processing_time
+            'Processing_Time': processing_time
         }
-        return repo_name, file_name, result, None
+        return repo_name, result, None
         
     except Exception as e:
-        return repo_name, file_name, None, str(e)
+        return repo_name, None, f"Error: {str(e)}"
 
 def run_benchmark_optimized():
-    """Run optimized benchmark on all repositories"""
-    print("🚀 Running Optimized Simple evaluate.py Benchmark")
+    """Run optimized benchmark"""
+    print("🚀 Running Optimized Direct evaluate.py Benchmark")
     print("=" * 60)
     
     start_time = time.time()
     
     # Setup directories
-    gt_dir = Path("your_data/ground_truth")
+    gt_dir = Path("your_data/ground_truth/v2")
     extracted_dir = Path("your_data/extracted_files")
     
     # Get ground truth files
@@ -162,47 +185,44 @@ def run_benchmark_optimized():
     repo_folders = [f for f in extracted_dir.iterdir() if f.is_dir()]
     print(f"Found {len(repo_folders)} repositories: {[f.name for f in repo_folders]}")
     
-    # Results storage
-    all_results = {}
-    
     # Prepare tasks for parallel processing
     tasks = []
     for repo_folder in repo_folders:
         repo_name = repo_folder.name
         for gt_file in gt_files:
-            tasks.append((repo_folder, gt_file, repo_name))
+            file_name = gt_file.stem
+            extracted_file = repo_folder / f"{file_name}.md"
+            tasks.append((repo_name, gt_file, extracted_file))
     
-    print(f"\n🔄 Processing {len(tasks)} file evaluations...")
+    print(f"Total tasks to process: {len(tasks)}")
     
-    # Process files in parallel
-    max_workers = min(8, len(tasks))  # Limit to 8 workers to prevent memory issues
+    # Results storage
+    all_results = {repo.name: [] for repo in repo_folders}
+    errors = []
+    
+    # Process with multiprocessing
+    max_workers = min(mp.cpu_count(), 8)  # Limit to prevent memory issues
     print(f"Using {max_workers} parallel workers")
     
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
         # Submit all tasks
         future_to_task = {executor.submit(process_single_file, task): task for task in tasks}
         
         # Process completed tasks
-        completed_count = 0
+        completed = 0
         for future in as_completed(future_to_task):
-            repo_name, file_name, result, error = future.result()
-            completed_count += 1
+            repo_name, result, error = future.result()
+            completed += 1
             
-            if completed_count % 10 == 0:  # Progress update every 10 files
-                print(f"  Progress: {completed_count}/{len(tasks)} files processed")
+            if completed % 10 == 0:
+                print(f"Progress: {completed}/{len(tasks)} tasks completed")
             
             if error:
-                print(f"  ❌ Error evaluating {file_name} in {repo_name}: {error}")
-                continue
-            
-            if result:
-                if repo_name not in all_results:
-                    all_results[repo_name] = []
+                errors.append(error)
+                print(f"  ⚠️  {error}")
+            elif result:
                 all_results[repo_name].append(result)
-                
-                # Print result with processing time
-                processing_time = result.get('processing_time', 0)
-                print(f"    ✅ {file_name}: F1={result['F1']:.3f}, P={result['Precision']:.3f}, R={result['Recall']:.3f}, A={result['Accuracy']:.3f} ({processing_time:.2f}s)")
+                print(f"    ✅ {result['filename']}: F1={result['F1']:.3f}, P={result['Precision']:.3f}, R={result['Recall']:.3f}, A={result['Accuracy']:.3f}")
     
     # Generate summary statistics
     print(f"\n📊 GENERATING SUMMARY STATISTICS")
@@ -218,7 +238,7 @@ def run_benchmark_optimized():
         avg_recall = mean([r['Recall'] for r in results])
         avg_f1 = mean([r['F1'] for r in results])
         avg_accuracy = mean([r['Accuracy'] for r in results])
-        avg_processing_time = mean([r.get('processing_time', 0) for r in results])
+        avg_time = mean([r['Processing_Time'] for r in results])
         
         summary_data.append({
             'Repository': repo_name,
@@ -227,7 +247,7 @@ def run_benchmark_optimized():
             'Avg_Recall': avg_recall,
             'Avg_F1': avg_f1,
             'Avg_Accuracy': avg_accuracy,
-            'Avg_Processing_Time': avg_processing_time
+            'Avg_Processing_Time': avg_time
         })
         
         print(f"\n{repo_name}:")
@@ -236,13 +256,13 @@ def run_benchmark_optimized():
         print(f"  Average Recall: {avg_recall:.3f}")
         print(f"  Average F1: {avg_f1:.3f}")
         print(f"  Average Accuracy: {avg_accuracy:.3f}")
-        print(f"  Average Processing Time: {avg_processing_time:.2f}s")
+        print(f"  Average Processing Time: {avg_time:.3f}s")
     
     # Create summary DataFrame
     summary_df = pd.DataFrame(summary_data)
     
     # Save results
-    output_dir = Path("simple_evaluate_results_optimized")
+    output_dir = Path("direct_evaluate_results_optimized")
     output_dir.mkdir(exist_ok=True)
     
     # Save detailed results
@@ -279,7 +299,7 @@ def run_benchmark_optimized():
         
         plt.xlabel('Repositories')
         plt.ylabel('Score')
-        plt.title('Optimized Simple evaluate.py Benchmark Results - Performance Comparison')
+        plt.title('Optimized Direct evaluate.py Benchmark Results - Performance Comparison')
         plt.xticks(x, summary_df_sorted['Repository'], rotation=45)
         plt.legend()
         plt.grid(True, alpha=0.3)
@@ -287,38 +307,19 @@ def run_benchmark_optimized():
         plt.savefig(output_dir / "performance_comparison.png", dpi=300, bbox_inches='tight')
         plt.close()
         
-        # 2. F1 Score Ranking
-        plt.figure(figsize=(10, 6))
-        bars = plt.bar(summary_df_sorted['Repository'], summary_df_sorted['Avg_F1'], 
-                       color=['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'])
-        
-        # Add value labels on bars
-        for bar, score in zip(bars, summary_df_sorted['Avg_F1']):
-            plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01, 
-                    f'{score:.3f}', ha='center', va='bottom', fontweight='bold')
-        
-        plt.xlabel('Repository')
-        plt.ylabel('Average F1 Score')
-        plt.title('Optimized Simple evaluate.py Benchmark - F1 Score Ranking')
-        plt.ylim(0, 1.1)
-        plt.grid(True, alpha=0.3)
-        plt.tight_layout()
-        plt.savefig(output_dir / "f1_score_ranking.png", dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        # 3. Processing Time Comparison
+        # 2. Processing Time Comparison
         plt.figure(figsize=(10, 6))
         bars = plt.bar(summary_df_sorted['Repository'], summary_df_sorted['Avg_Processing_Time'], 
-                       color=['#FF9999', '#66B2FF', '#99FF99', '#FFCC99', '#FF99CC', '#99CCFF'])
+                       color=['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'])
         
         # Add value labels on bars
         for bar, time_val in zip(bars, summary_df_sorted['Avg_Processing_Time']):
             plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01, 
-                    f'{time_val:.2f}s', ha='center', va='bottom', fontweight='bold')
+                    f'{time_val:.3f}s', ha='center', va='bottom', fontweight='bold')
         
         plt.xlabel('Repository')
         plt.ylabel('Average Processing Time (seconds)')
-        plt.title('Optimized Simple evaluate.py Benchmark - Processing Time Comparison')
+        plt.title('Optimized Direct evaluate.py Benchmark - Processing Time Comparison')
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
         plt.savefig(output_dir / "processing_time_comparison.png", dpi=300, bbox_inches='tight')
@@ -330,36 +331,35 @@ def run_benchmark_optimized():
         print(f"  ⚠️  Warning: Could not generate visualizations: {e}")
     
     # Generate final report
+    total_time = time.time() - start_time
     print(f"\n📋 FINAL REPORT")
     print("=" * 60)
-    
-    total_time = time.time() - start_time
     
     if not summary_df.empty:
         best_f1 = summary_df.loc[summary_df['Avg_F1'].idxmax()]
         best_precision = summary_df.loc[summary_df['Avg_Precision'].idxmax()]
         best_recall = summary_df.loc[summary_df['Avg_Recall'].idxmax()]
         best_accuracy = summary_df.loc[summary_df['Avg_Accuracy'].idxmax()]
-        fastest_processing = summary_df.loc[summary_df['Avg_Processing_Time'].idxmin()]
+        fastest = summary_df.loc[summary_df['Avg_Processing_Time'].idxmin()]
         
         print(f"🏆 BEST PERFORMERS:")
         print(f"  • Best F1 Score: {best_f1['Repository']} ({best_f1['Avg_F1']:.3f})")
         print(f"  • Best Precision: {best_precision['Repository']} ({best_precision['Avg_Precision']:.3f})")
         print(f"  • Best Recall: {best_recall['Repository']} ({best_recall['Avg_Recall']:.3f})")
         print(f"  • Best Accuracy: {best_accuracy['Repository']} ({best_accuracy['Avg_Accuracy']:.3f})")
-        print(f"  • Fastest Processing: {fastest_processing['Repository']} ({fastest_processing['Avg_Processing_Time']:.2f}s)")
+        print(f"  • Fastest Processing: {fastest['Repository']} ({fastest['Avg_Processing_Time']:.3f}s)")
         
         print(f"\n📊 OVERALL RANKING (by F1 Score):")
         summary_df_sorted = summary_df.sort_values('Avg_F1', ascending=False)
         for i, (_, repo) in enumerate(summary_df_sorted.iterrows(), 1):
-            print(f"  {i}. {repo['Repository']:<15} - F1: {repo['Avg_F1']:.3f}, Files: {repo['Files_Evaluated']}, Time: {repo['Avg_Processing_Time']:.2f}s")
+            print(f"  {i}. {repo['Repository']:<15} - F1: {repo['Avg_F1']:.3f}, Files: {repo['Files_Evaluated']}, Time: {repo['Avg_Processing_Time']:.3f}s")
     
-    print(f"\n⏱️  Total benchmark time: {total_time:.2f} seconds")
+    print(f"\n⏱️  Total execution time: {total_time:.2f} seconds")
     print(f"📁 Results saved to: {output_dir}")
     print(f"  • Summary: summary_results.csv")
     print(f"  • Detailed: {repo_name}_detailed_results.csv")
     print(f"  • All results: all_results.json")
-    print(f"  • Visualizations: performance_comparison.png, f1_score_ranking.png, processing_time_comparison.png")
+    print(f"  • Visualizations: performance_comparison.png, processing_time_comparison.png")
     
     return summary_df
 
@@ -368,6 +368,6 @@ if __name__ == "__main__":
         results = run_benchmark_optimized()
         print(f"\n✅ Optimized benchmark completed successfully!")
     except Exception as e:
-        print(f"\n❌ Benchmark failed: {e}")
+        print(f"\n❌ Optimized benchmark failed: {e}")
         import traceback
         traceback.print_exc()
