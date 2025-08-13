@@ -32,9 +32,21 @@ cd BenchmarkRAG
 pip install -r requirements.txt
 ```
 
-3. **Verify installation**:
+3. **For Vietnamese text evaluation** (optional):
+```bash
+# Install Vietnamese-specific dependencies
+python install_vietnamese_deps.py
+
+# Or manually install
+pip install python-Levenshtein underthesea
+```
+
+4. **Verify installation**:
 ```bash
 python main.py list-repos
+
+# Test Vietnamese dependencies (if installed)
+python test_vietnamese.py
 ```
 
 ## 📁 Project Structure
@@ -98,6 +110,28 @@ Results are saved in the output directory:
 - `performance_comparison.png` - Performance charts
 - `interactive_dashboard.html` - Interactive visualizations
 - `report.html` - HTML report
+
+## 🇻🇳 Vietnamese Text Evaluation
+
+For Vietnamese text evaluation, use the optimized benchmark:
+
+```bash
+# Run Vietnamese-optimized benchmark
+python leivein_benchmark_optimized.py
+```
+
+This version uses:
+- **underthesea**: Vietnamese word tokenization
+- **python-Levenshtein**: String similarity calculation
+- **Optimized processing**: Parallel execution with progress tracking
+
+Results are saved in `direct_evaluate_results_optimized/`:
+- `summary_results.csv` - Performance summary
+- `{tool}_detailed_results.csv` - Detailed results per tool
+- `performance_comparison.png` - Visual comparison
+- `processing_time_comparison.png` - Time analysis
+
+See `README_VIETNAMESE.md` for detailed Vietnamese evaluation documentation.
 
 ## 🔍 Evaluation Mode (Pre-Extracted Files)
 

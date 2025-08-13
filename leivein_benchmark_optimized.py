@@ -10,12 +10,13 @@ import json
 from pathlib import Path
 import matplotlib.pyplot as plt
 from statistics import mean
-import re
 from scipy.spatial.distance import cdist
 import time
-from functools import lru_cache
 import multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from Levenshtein import ratio
+from underthesea import word_tokenize
+from tqdm import tqdm
 
 # Optimized functions
 def extract_txt(txt_path):
@@ -23,85 +24,38 @@ def extract_txt(txt_path):
         text = ' '.join(line.strip() for line in f)
     return text
 
-def simple_word_tokenize(text):
-    """Simple word tokenization to replace underthesea.word_tokenize"""
-    # Remove special characters and split by whitespace
-    text = re.sub(r'[^\w\s]', ' ', text)
-    words = text.split()
-    return [word.lower() for word in words if word.strip()]
-
-@lru_cache(maxsize=10000)
-def levenshtein_ratio_cached(str1, str2):
-    """Cached version of Levenshtein ratio for repeated calculations"""
-    return levenshtein_ratio(str1, str2)
-
-def levenshtein_ratio(str1, str2):
-    """Calculate Levenshtein similarity ratio (replacement for Levenshtein.ratio)"""
-    if len(str1) < len(str2):
-        return levenshtein_ratio(str2, str1)
-    
-    if len(str2) == 0:
-        return 0.0
-    
-    # Early exit for exact matches
-    if str1 == str2:
-        return 1.0
-    
-    # Early exit for very different lengths
-    if abs(len(str1) - len(str2)) > max(len(str1), len(str2)) * 0.5:
-        return 0.0
-    
-    previous_row = list(range(len(str2) + 1))
-    for i, c1 in enumerate(str1):
-        current_row = [i + 1]
-        for j, c2 in enumerate(str2):
-            insertions = previous_row[j + 1] + 1
-            deletions = current_row[j] + 1
-            substitutions = previous_row[j] + (c1 != c2)
-            current_row.append(min(insertions, deletions, substitutions))
-        previous_row = current_row
-    
-    distance = previous_row[-1]
-    max_len = max(len(str1), len(str2))
-    if max_len == 0:
-        return 1.0
-    return 1.0 - (distance / max_len)
-
-def compute_sim_matrix_optimized(ex_tokens, gt_tokens):
+def compute_sim_matrix(ex_nump, gt_nump):
     """
-    Optimized similarity matrix computation with early termination
+    This function computes the similarity matrix for each word from a numpy array. or it can also compare whole abstract as a collated tokens.
+    :param ex_nump: Extracted paragraph as numpy array
+    :param gt_nump: Ground truth paragraph as numpy array
+    :return: Similarity Matrix with Lavensteins similarity index.
     """
-    # Limit matrix size for very large documents
-    max_tokens = 500  # Limit to prevent memory issues
-    
-    if len(ex_tokens) > max_tokens:
-        ex_tokens = ex_tokens[:max_tokens]
-    if len(gt_tokens) > max_tokens:
-        gt_tokens = gt_tokens[:max_tokens]
-    
-    # Use numpy for faster computation
-    ex_nump = np.array(ex_tokens)
-    gt_nump = np.array(gt_tokens)
-    
-    # Use vectorized operations where possible
-    matrix = cdist(ex_nump.reshape(-1, 1), gt_nump.reshape(-1, 1), 
-                   lambda x, y: levenshtein_ratio_cached(x[0], y[0]))
-    
-    return pd.DataFrame(data=matrix, index=ex_tokens, columns=gt_tokens)
+    matrix = cdist(ex_nump.reshape(-1, 1), gt_nump.reshape(-1, 1), lambda x, y: ratio(x[0], y[0]))
+    df = pd.DataFrame(data=matrix, index=ex_nump, columns=gt_nump)
+    return df
 
-def compute_tpfp_optimized(matrix):
+def compute_tpfp(matrix):
     """
-    Optimized TP/FP computation using numpy operations
+    This function considers Extracted token as Ground-truth token when its Levenshteins similarity index is > 0.7. Otherwise it is non-gt token.
+    :param matrix: Similarity Matrix
+    :return: Number of GT in ET, Number of Non GT
     """
-    # Skip first row/column (document-level comparison)
-    sub_matrix = matrix.iloc[1:, 1:].values
-    
-    # Vectorized operations
-    max_similarities = np.max(sub_matrix, axis=1)
-    tp = np.sum(max_similarities > 0.7)
-    fp = len(max_similarities) - tp
-    
-    return int(tp), int(fp)
+    tp=0
+    fp=0
+    rows=matrix.shape[0]
+    cols=matrix.shape[1]
+    for x in range(1,rows):
+        flag = False
+        for y in range(1,cols):
+            if matrix.iloc[x,y] > 0.7:
+                flag=True
+                break
+        if flag:
+            tp+=1
+        else:
+            fp+=1
+    return tp,fp
 
 def compute_scores(tp, fp, gttoken):
     """
@@ -120,12 +74,12 @@ def compute_scores(tp, fp, gttoken):
         return f1_score, prec, recall
 
 def eval_optimized(ex_path, gt_path):
-    """Optimized evaluation function"""
+    """Optimized evaluation function using Vietnamese dependencies"""
     ex = extract_txt(ex_path)
     gt = extract_txt(gt_path)
 
-    gt_tokens = simple_word_tokenize(gt)
-    ex_tokens = simple_word_tokenize(ex)
+    gt_tokens = word_tokenize(gt)
+    ex_tokens = word_tokenize(ex)
     num_gt_tokens = len(gt_tokens)
     
     # Add document-level comparison
@@ -134,8 +88,8 @@ def eval_optimized(ex_path, gt_path):
     gt_tokens = gt + gt_tokens
     ex_tokens = ex + ex_tokens
 
-    matrix = compute_sim_matrix_optimized(ex_tokens, gt_tokens)
-    tp, fp = compute_tpfp_optimized(matrix)
+    matrix = compute_sim_matrix(np.array(ex_tokens), np.array(gt_tokens))
+    tp, fp = compute_tpfp(matrix)
     f1_score, prec, recall = compute_scores(tp, fp, num_gt_tokens)
     acc = float(matrix.iloc[0, 0])
 
@@ -176,7 +130,6 @@ def run_benchmark_optimized():
     # Setup directories
     gt_dir = Path("your_data/ground_truth/v2")
     extracted_dir = Path("your_data/extracted_files")
-    
     # Get ground truth files
     gt_files = list(gt_dir.glob("*.md"))
     print(f"Found {len(gt_files)} ground truth files")
@@ -208,14 +161,11 @@ def run_benchmark_optimized():
         # Submit all tasks
         future_to_task = {executor.submit(process_single_file, task): task for task in tasks}
         
-        # Process completed tasks
+        # Process completed tasks with progress bar
         completed = 0
-        for future in as_completed(future_to_task):
+        for future in tqdm(as_completed(future_to_task), total=len(tasks), desc="Evaluating"):
             repo_name, result, error = future.result()
             completed += 1
-            
-            if completed % 10 == 0:
-                print(f"Progress: {completed}/{len(tasks)} tasks completed")
             
             if error:
                 errors.append(error)
